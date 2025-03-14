@@ -3,6 +3,9 @@ package dev.coderbin;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.muserver.Method;
+import io.muserver.MuRequest;
+import io.muserver.MuResponse;
+import io.muserver.RouteHandler;
 import org.flywaydb.core.Flyway;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -13,6 +16,7 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static io.muserver.MuServerBuilder.muServer;
@@ -33,6 +37,10 @@ public record App(HikariDataSource ds, io.muserver.MuServer server) {
 
         var server = muServer()
                 .withHttpPort(3000)
+                .addHandler(restHandler(new RestaurantResource(new RestaurantDB(connectionPool)))
+                        .addCustomReader(new RestaurantBodyReader())
+                        .addCustomWriter(new RestaurantBodyWriter())
+                )
                 .start();
 
         log.info("Started user endpoint at " + server.uri());
