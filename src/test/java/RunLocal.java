@@ -6,15 +6,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.concurrent.Executors;
 
 public class RunLocal {
     private static final Logger log = LoggerFactory.getLogger(RunLocal.class);
 
 
-    public static void main(String[] args) throws IOException, InterruptedException, SQLException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         log.info("Starting locally...");
-
 
         EmbeddedPostgres pg = EmbeddedPostgres.builder()
                 .setPort(21000)
@@ -37,39 +35,8 @@ public class RunLocal {
             }
         }));
 
-
-        log.info("PG version is " + app.getPGVersion());
-
-//        hammerTime(app);
-
-        for (String username : app.getUsernames()) {
-            log.info("Username: " + username);
-        }
-
         Thread.sleep(Long.MAX_VALUE);
 
-
     }
 
-    private static void hammerTime(App app) {
-        var start = System.currentTimeMillis();
-        int executions = 1000;
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            for (int i = 0; i < executions; i++) {
-                int finalI = i;
-                executor.execute(() -> {
-                    try {
-                        log.info("Starting " + finalI);
-                        app.getPGVersion();
-                        app.logConnectionPool();
-                        log.info("Completed " + finalI);
-                    } catch (SQLException e) {
-                        log.warn("Error getting PG version", e);
-                    }
-                });
-            }
-        }
-        var duration = System.currentTimeMillis() - start;
-        log.info("Hammer time: " + duration + " with average " + (Double.valueOf(duration) / Double.valueOf(executions)));
-    }
 }
