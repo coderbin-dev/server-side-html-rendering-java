@@ -37,9 +37,12 @@ public record App(HikariDataSource ds, io.muserver.MuServer server) {
 
         var server = muServer()
                 .withHttpPort(3000)
-                .addHandler(restHandler(new RestaurantResource(new RestaurantDB(connectionPool)))
-                        .addCustomReader(new RestaurantBodyReader())
-                        .addCustomWriter(new RestaurantBodyWriter())
+                .addHandler(restHandler(
+                        new RestaurantResource(new RestaurantDB(connectionPool)),
+                        new MenuItemResource(new MenuItemDB(connectionPool))
+                        )
+                        .addCustomReader(new JsonableBodyReader())
+                        .addCustomWriter(new JsonableBodyWriter())
                 )
                 .start();
 
