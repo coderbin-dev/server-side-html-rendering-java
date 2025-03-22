@@ -14,9 +14,10 @@ public class RestaurantDB {
 
     public void insert(Restaurant restaurant) throws SQLException {
         try (Connection con = db.getConnection();
-             var stmt = con.prepareStatement("INSERT INTO restaurants(id, name) VALUES(?, ?)")) {
+             var stmt = con.prepareStatement("INSERT INTO restaurants(id, name, description) VALUES(?, ?, ?)")) {
             stmt.setObject(1, restaurant.id());
             stmt.setString(2, restaurant.name());
+            stmt.setString(3, restaurant.description());
             stmt.executeUpdate();
         }
     }
@@ -27,7 +28,10 @@ public class RestaurantDB {
             stmt.setObject(1, id);
             try (var rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return new Restaurant((UUID)rs.getObject("id"), rs.getString("name"));
+                    return new Restaurant(
+                            (UUID)rs.getObject("id"),
+                            rs.getString("name"),
+                            rs.getString("description"));
                 } else {
                     return null;
                 }

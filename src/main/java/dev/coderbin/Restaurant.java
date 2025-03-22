@@ -1,5 +1,6 @@
 package dev.coderbin;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
@@ -7,6 +8,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -17,16 +19,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.UUID;
 
-public record Restaurant(UUID id, String name) {
+public record Restaurant(UUID id, String name, String description) {
 
     public static Restaurant fromJSON(JSONObject jsonObject) {
-        return new Restaurant(UUID.fromString(jsonObject.optString("id")), jsonObject.optString("name"));
+        String name = jsonObject.optString("name");
+        if (name.isBlank()) throw new IllegalArgumentException("Restaurant name cannot be blank.");
+        return new Restaurant(UUID.fromString(jsonObject.optString("id")),
+                name, jsonObject.optString("description"));
     }
 
     public JSONObject toJSON() {
         return new JSONObject()
                 .put("id", id)
-                .put("name", name);
+                .put("name", name)
+                .put("description", description);
     }
 }
 
@@ -40,7 +46,13 @@ class RestaurantBodyReader implements MessageBodyReader<Restaurant> {
 
     @Override
     public Restaurant readFrom(Class<Restaurant> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
-        return Restaurant.fromJSON(new JSONObject(new JSONTokener(entityStream)));
+        try {
+            return Restaurant.fromJSON(new JSONObject(new JSONTokener(entityStream)));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
+        } catch (JSONException e) {
+            throw new BadRequestException("Invalid JSON format.");
+        }
     }
 }
 

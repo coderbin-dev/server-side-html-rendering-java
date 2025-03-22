@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 class AppTest {
@@ -34,13 +35,10 @@ class AppTest {
     @Test
     public void canPostANewRestaurantAndQueryItBack() throws Exception {
 
-        var restaurant = new Restaurant(UUID.randomUUID(), "Wok and Rolls");
+        var restaurant = new Restaurant(UUID.randomUUID(), "Wok and Rolls",
+                "All the best rolls");
 
-        var resp = send(request(app.uri().resolve("/api/v1/restaurants"))
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(restaurant.toJSON().toString()))
-        );
+        var resp = createRestaurant(restaurant.toJSON().toString());
         assertThat(resp.statusCode(), equalTo(201));
         assertThat(Restaurant.fromJSON(new JSONObject(resp.body())), equalTo(restaurant));
 
@@ -52,6 +50,34 @@ class AppTest {
 
 
     }
+
+    @Test
+    public void a400IsReturnedIfThereIsNoNameWhenCreatingARestaurant() throws Exception {
+        var restaurant = new Restaurant(UUID.randomUUID(), "Wok and Rolls",
+                "All the best rolls");
+        var requestBody = restaurant.toJSON();
+        requestBody.remove("name");
+
+        var resp = createRestaurant(requestBody.toString());
+        assertThat(resp.statusCode(), equalTo(400));
+        assertThat(resp.body(), containsString("Restaurant name cannot be blank."));
+    }
+
+    @Test
+    public void a400IsReturnedIfTheJSONIsInvalid() throws Exception {
+        var resp = createRestaurant("{ invalid json");
+        assertThat(resp.statusCode(), equalTo(400));
+        assertThat(resp.body(), containsString("Invalid JSON format."));
+    }
+
+    private static HttpResponse<String> createRestaurant(String body) throws IOException, InterruptedException {
+        return send(request(app.uri().resolve("/api/v1/restaurants"))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+        );
+    }
+
 
     private static HttpResponse<String> send(HttpRequest.Builder request) throws IOException, InterruptedException {
         return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
