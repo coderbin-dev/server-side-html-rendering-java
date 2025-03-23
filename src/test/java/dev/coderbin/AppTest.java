@@ -32,6 +32,9 @@ class AppTest {
         client = HttpClient.newHttpClient();
     }
 
+
+
+
     @Test
     public void canPostANewRestaurantAndQueryItBack() throws Exception {
         var restaurant = new Restaurant(UUID.randomUUID(), "Wok and Rolls",
@@ -47,6 +50,7 @@ class AppTest {
         assertThat(lookupResp.statusCode(), equalTo(200));
         assertThat(Restaurant.fromJSON(new JSONObject(lookupResp.body())), equalTo(restaurant));
     }
+
     @Test
     public void canCreateRestaurantAndAddItems() throws Exception {
         var restaurant = new Restaurant(UUID.randomUUID(), "Wok and Rolls",
@@ -76,9 +80,6 @@ class AppTest {
         assertThat(results, containsInAnyOrder(item, item2));
 
     }
-
-
-
 
 
     private HttpResponse<String> createMenuItem(MenuItem item) throws IOException, InterruptedException {
