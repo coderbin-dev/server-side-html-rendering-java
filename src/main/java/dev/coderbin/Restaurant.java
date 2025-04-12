@@ -1,7 +1,9 @@
 package dev.coderbin;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.UUID;
 
 public record Restaurant(UUID id, String name, String description) implements Jsonable {
@@ -19,4 +21,15 @@ public record Restaurant(UUID id, String name, String description) implements Js
                 .put("name", name)
                 .put("description", description);
     }
+
+    public record RestaurantList(List<Restaurant> restaurants) implements Jsonable {
+
+        @Override
+        public JSONObject toJSON() {
+            return new JSONObject()
+                    .put("restaurants", new JSONArray(restaurants.stream().map(Restaurant::toJSON).toList()));
+        }
+    }
+
 }
+

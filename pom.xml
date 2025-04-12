@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.coderbin</groupId>
-    <artifactId>inverting-the-test-pyramid</artifactId>
+    <artifactId>server-side-html-rendering-java</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -59,6 +59,12 @@
             <artifactId>json</artifactId>
             <version>20250107</version>
         </dependency>
+        <dependency>
+            <groupId>io.pebbletemplates</groupId>
+            <artifactId>pebble</artifactId>
+            <version>3.2.4</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.hamcrest</groupId>

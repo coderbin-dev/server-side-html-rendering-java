@@ -2,7 +2,10 @@ package dev.coderbin;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class RestaurantDB {
@@ -28,15 +31,31 @@ public class RestaurantDB {
             stmt.setObject(1, id);
             try (var rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return new Restaurant(
-                            (UUID)rs.getObject("id"),
-                            rs.getString("name"),
-                            rs.getString("description"));
+                    return rowToRestaurant(rs);
                 } else {
                     return null;
                 }
             }
         }
+    }
+
+    public List<Restaurant> getAll() throws SQLException {
+        try (var con = db.getConnection();
+             var stmt = con.prepareStatement("SELECT * FROM restaurants ORDER BY name");
+             var rs = stmt.executeQuery()) {
+            var results = new ArrayList<Restaurant>();
+            while (rs.next()) {
+                results.add(rowToRestaurant(rs));
+            }
+            return results;
+        }
+    }
+
+    private static Restaurant rowToRestaurant(ResultSet rs) throws SQLException {
+        return new Restaurant(
+                (UUID) rs.getObject("id"),
+                rs.getString("name"),
+                rs.getString("description"));
     }
 
 }

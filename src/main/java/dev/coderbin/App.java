@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static io.muserver.MuServerBuilder.muServer;
+import static io.muserver.handlers.ResourceHandlerBuilder.fileOrClasspath;
 import static io.muserver.rest.RestHandlerBuilder.restHandler;
 
 public record App(HikariDataSource ds, io.muserver.MuServer server) {
@@ -27,6 +28,7 @@ public record App(HikariDataSource ds, io.muserver.MuServer server) {
 
     public static App start(DataSource directDataSource) {
 
+        // Set up the database schema
         Flyway.configure().dataSource(directDataSource).load().migrate();
 
         // create connection pool:
@@ -35,15 +37,11 @@ public record App(HikariDataSource ds, io.muserver.MuServer server) {
         config.setMaximumPoolSize(10);
         var connectionPool = new HikariDataSource(config);
 
+        // start the web server
         var server = muServer()
                 .withHttpPort(3000)
-                .addHandler(restHandler(
-                        new RestaurantResource(new RestaurantDB(connectionPool)),
-                        new MenuItemResource(new MenuItemDB(connectionPool))
-                        )
-                        .addCustomReader(new JsonableBodyReader())
-                        .addCustomWriter(new JsonableBodyWriter())
-                )
+                .addHandler(restHandler(new RestaurantResource(new RestaurantDB(connectionPool)), new MenuItemResource(new MenuItemDB(connectionPool))).addCustomReader(new JsonableBodyReader()).addCustomWriter(new JsonableBodyWriter()))
+                .addHandler(fileOrClasspath("src/main/resources/web", "/web"))
                 .start();
 
         log.info("Started user endpoint at " + server.uri());

@@ -1,0 +1,26 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+    background-color: #ecd4dc;
+    padding: 20px;
+    margin: 20px;
+    border: 1px solid #333;
+    border-radius: 20px;
+    h1 {
+        text-align: center;
+        width: 100%;
+    }
+}
+
+div.restaurant {
+    padding: 20px;
+    margin: 20px;
+    border: 1px solid #333;
+    border-radius: 20px;
+    background-color: antiquewhite;
+    h2 {
+        margin: 10px 0;
+    }
+}
