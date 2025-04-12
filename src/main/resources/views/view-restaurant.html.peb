@@ -1,0 +1,9 @@
+{# @pebvariable name="restaurant" type="dev.coderbin.Restaurant" #}
+{% extends "_template.html.peb" %}
+{% block main %}
+
+    <h1>{{restaurant.name()}}!!!</h1>
+
+    <p>{{ restaurant.description() }}</p>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "_template.html.peb" %}
+{% block main %}
+
+    <h1>Restaurants</h1>
+
+    {# @pebvariable name="restaurants" type="java.util.List<dev.coderbin.Restaurant>" #}
+    {% for restaurant in restaurants %}
+        <div class="restaurant">
+            <h2>{{ restaurant.name() }}</h2>
+            <p>{{ restaurant.description() }}</p>
+            <a href="/restaurants/{{ restaurant.id() }}">View more</a>
+        </div>
+    {% endfor %}
+
+{% endblock %}

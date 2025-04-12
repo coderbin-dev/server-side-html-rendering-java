@@ -37,10 +37,17 @@ public record App(HikariDataSource ds, io.muserver.MuServer server) {
         config.setMaximumPoolSize(10);
         var connectionPool = new HikariDataSource(config);
 
+        // create the DB access classes
+        var restaurantDB = new RestaurantDB(connectionPool);
+        var menuItemDB = new MenuItemDB(connectionPool);
+
         // start the web server
+        ViewRenderer renderer = ViewRenderer.create(true);
         var server = muServer()
                 .withHttpPort(3000)
-                .addHandler(restHandler(new RestaurantResource(new RestaurantDB(connectionPool)), new MenuItemResource(new MenuItemDB(connectionPool))).addCustomReader(new JsonableBodyReader()).addCustomWriter(new JsonableBodyWriter()))
+                .addHandler(Method.GET, "/", new HomeHandler(restaurantDB, renderer))
+                .addHandler(Method.GET, "/restaurants/{id}", new ViewRestaurantHandler(restaurantDB, renderer))
+                .addHandler(restHandler(new RestaurantResource(restaurantDB), new MenuItemResource(menuItemDB)).addCustomReader(new JsonableBodyReader()).addCustomWriter(new JsonableBodyWriter()))
                 .addHandler(fileOrClasspath("src/main/resources/web", "/web"))
                 .start();
 
